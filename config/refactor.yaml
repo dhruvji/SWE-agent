@@ -32,7 +32,7 @@ instance_template: |-
   {issue}
 
   INSTRUCTIONS:
-  Now, you're going to solve this refactoring issue on your own. Your terminal session has started and you're in the repository's root directory. You can use any bash commands or the special interface to help you. Edit all the files you need to and run any checks or tests that you want.
+  Now, you're going to solve this issue on your own. Your terminal session has started and you're in the repository's root directory. You can use any bash commands or the special interface to help you. Edit all the files you need to and run any checks or tests that you want.
   Remember, YOU CAN ONLY ENTER ONE COMMAND AT A TIME. You should always wait for feedback after every command.
   When you're satisfied with all of the changes you've made, you can submit your changes to the code base by simply running the submit command.
   Note however that you cannot use any interactive session commands (e.g. python, vim) in this environment, but you can write scripts and run them. E.g. you can write a python script and then run it with `python <script_name>.py`.
@@ -40,7 +40,7 @@ instance_template: |-
   NOTE ABOUT THE EDIT COMMAND: Indentation really matters! When editing a file, make sure to insert appropriate indentation before each line!
 
   IMPORTANT TIPS:
-  1. Always start by trying to find where to do the refactor. 
+  1. Always start by trying to understand all the files and instances you will have to edit and the core refactor location.
 
   2. If you run a command and it doesn't work, try running a different command. A command that did not work once will not work the second time unless you modify it!
 
@@ -52,25 +52,22 @@ instance_template: |-
 
   6. It may be necessary to install the repository from source before you can run code. Please think about how to install the environment from the repository directory if you need to do so.
 
-  7. Do not runthe repo tests, just focus on comprehensively finishing the multi file refactor to the best of your abilities.
 
   (Open file: {open_file})
   (Current directory: {working_dir})
   bash-$
 next_step_template: |-
   {observation}
-  (Recent Edits: {recent_edits})
   (Open file: {open_file})
   (Current directory: {working_dir})
   bash-$
 next_step_no_output_template: |-
   Your command ran successfully and did not produce any output.
-  (Recent Edits: {recent_edits})
   (Open file: {open_file})
   (Current directory: {working_dir})
   bash-$
 demonstration_template: |
-  Here is a demonstration of how to correctly accomplish a bug fix, not a refactor.
+  Here is a demonstration of how to correctly accomplish this task.
   It is included to show you how to correctly use the interface.
   You do not need to follow exactly what is done in the demonstration.
   --- DEMONSTRATION ---
@@ -81,34 +78,12 @@ state_command:
   code: |
     state() {
       local working_dir="$PWD";
-
-      # Initialize the state JSON object with the working directory
-      state_json='{"working_dir": "'$working_dir'"'
-
-      # Add information about the currently open file
       if [ -z $CURRENT_FILE ]; then
-          state_json+=', "open_file": "n/a"'
+          echo '{"open_file": "n/a", "working_dir": "'$working_dir'"}';
       else
-          state_json+=', "open_file": "'$(realpath $CURRENT_FILE)'"'
+          echo '{"open_file": "'$(realpath $CURRENT_FILE)'", "working_dir": "'$working_dir'"}';
       fi
-
-      # Use the $RECENT_EDITS variable for recent edits
-      if [ -n "$RECENT_EDITS" ]; then
-          # Convert $RECENT_EDITS to a JSON array
-          recent_edits_json=$(echo "$RECENT_EDITS" | jq -R -s -c 'split(" | ")')
-          state_json+=', "recent_edits": '$recent_edits_json
-      else
-          state_json+=', "recent_edits": []'
-      fi
-
-      # Close the JSON object
-      state_json+='}'
-
-      # Print the state JSON
-      echo $state_json
     };
-
-
 parse_function: ThoughtActionParser
 env_variables:
   WINDOW: 100

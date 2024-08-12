@@ -86,6 +86,13 @@ edit() {
         _print
 
         echo "File updated. Please review the changes and make sure they are correct (correct indentation, no duplicate lines, etc). Edit the file again if necessary."
+
+        local log_message="Edited $(basename "$CURRENT_FILE") at lines $((start_line+1)):$end_line"
+        if [ -z "$RECENT_EDITS" ]; then
+            export RECENT_EDITS="$log_message"
+        else
+            export RECENT_EDITS="$RECENT_EDITS | $log_message"
+        fi
     else
         echo "Your proposed edit has introduced new syntax error(s). Please read this error message carefully and then retry editing the file."
         echo ""

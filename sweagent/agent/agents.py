@@ -90,12 +90,39 @@ class AgentConfig(FrozenSerializable):
         "nano",
     )
     # Should extract environment state in a json readable form
-    state_command: Command = Command(
+    # Add previous state observations here
+    state_command = Command(
         name="state",
-        code="""state() {
-            echo '{"working_dir": "'$(realpath --relative-to=$ROOT/.. $PWD)'"}';
-        };""",
+        code="""
+        state() {
+            # Define the state JSON object
+            state_json='{"working_dir": "'$(realpath --relative-to=$ROOT/.. $PWD)'"'
+            
+            # Add information about the currently open file
+            if [ -z $CURRENT_FILE ]; then
+                state_json+=', "open_file": "n/a"'
+            else
+                state_json+=', "open_file": "'$(realpath $CURRENT_FILE)'"'
+            fi
+
+            # Use the $RECENT_EDITS variable for recent edits
+            if [ -n "$RECENT_EDITS" ]; then
+                # Convert $RECENT_EDITS to a JSON array
+                recent_edits_json=$(echo "$RECENT_EDITS" | jq -R -s -c 'split(" | ")')
+                state_json+=', "recent_edits": '$recent_edits_json
+            else
+                state_json+=', "recent_edits": []'
+            fi
+            
+            # Close the JSON object
+            state_json+='}'
+            
+            # Print the state JSON
+            echo $state_json
+        };
+        """
     )
+
     _commands: list[Command] = field(default_factory=list)
     _subroutines: dict[str, Subroutine] = field(default_factory=dict)
     subroutine_types: list[Subroutine] = field(default_factory=list)
@@ -528,6 +555,7 @@ class Agent:
         # Populate selected template(s) with information (e.g., issue, arguments, state)
         messages = []
         for template in templates:
+            print(state_vars)
             messages.append(
                 template.format(
                     **self.instance_args,
@@ -808,6 +836,7 @@ class Agent:
             for hook in self.hooks:
                 hook.on_step_start()
             state = env.communicate(self.state_command) if self.state_command else None
+            print(f"Raw state output: {state}")
             thought, action, output = self.forward(observation, env.get_available_actions(), state)
             for hook in self.hooks:
                 hook.on_actions_generated(thought=thought, action=action, output=output)

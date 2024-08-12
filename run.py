@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import sys
+print(sys.executable)
 
 from sweagent import CONFIG_DIR
 from sweagent.utils.log import add_file_handler, get_logger

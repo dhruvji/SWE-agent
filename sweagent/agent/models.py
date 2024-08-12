@@ -230,6 +230,11 @@ class OpenAIModel(BaseModel):
             "cost_per_input_token": 1.5e-07,
             "cost_per_output_token": 6e-07,
         },
+        "deepprompt-gpt-4o": {
+            "max_context": 128_000,
+            "cost_per_input_token": 1e-05,
+            "cost_per_output_token": 3e-05,
+        },
     }
 
     SHORTCUTS = {
@@ -242,6 +247,7 @@ class OpenAIModel(BaseModel):
         "gpt4-turbo": "gpt-4-turbo-2024-04-09",
         "gpt4o": "gpt-4o-2024-05-13",
         "gpt-4o-mini": "gpt-4o-mini-2024-07-18",
+        'deepprompt-gpt-4o-2024-05-13' : "deepprompt-gpt-4o",
     }
 
     def __init__(self, args: ModelArguments, commands: list[Command]):
@@ -263,7 +269,7 @@ class OpenAIModel(BaseModel):
             self.client = AzureOpenAI(
                 api_key=keys_config["AZURE_OPENAI_API_KEY"],
                 azure_endpoint=keys_config["AZURE_OPENAI_ENDPOINT"],
-                api_version=keys_config.get("AZURE_OPENAI_API_VERSION", "2024-02-01"),
+                api_version=keys_config.get("AZURE_OPENAI_API_VERSION", "2024-05-01-preview"),
             )
         else:
             api_base_url: str | None = keys_config.get("OPENAI_API_BASE_URL", None)
